@@ -8,14 +8,18 @@
 
 class APathActor;
 class AEnemy;
+class UEnemyDataAsset;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDied, AEnemy*, Enemy);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyReachedEnd, AEnemy*, Enemy);
 UCLASS()
 class WESTERNTOWERDEFENSE_API AEnemy : public ACharacter, public IDamageable
 {
 	GENERATED_BODY()
 
+	
+
+	
 public:
 	AEnemy();
 
@@ -24,6 +28,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetPath(APathActor* NewPath) { Path = NewPath; }
 
+	void InitFromData(UEnemyDataAsset* Data);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnEnemyReachedEnd OnEnemyReachedEnd;
+	
 	UFUNCTION(BlueprintCallable)
 	int32 GetReward() const { return Reward; }
 

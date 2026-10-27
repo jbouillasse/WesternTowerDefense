@@ -2,6 +2,8 @@
 #include "Enemy.h"
 #include "PathActor.h"
 #include "Saloon.h"
+#include "EnemyDataAsset.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "AIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -104,6 +106,7 @@ void AEnemy::ReachedEnd()
             Target->ReceiveDamage(DamageToSaloon);
         }
     }
+    OnEnemyReachedEnd.Broadcast(this);
     bDead = true;
     Destroy();
 }
@@ -124,4 +127,21 @@ void AEnemy::Die()
     bDead = true;
     OnEnemyDied.Broadcast(this);
     Destroy();
+}
+
+void AEnemy::InitFromData(UEnemyDataAsset* Data)
+{
+    if (!Data) return;
+
+    MaxHealth = Data->MaxHealth;
+    MoveSpeed = Data->MoveSpeed;
+    DamageToSaloon = Data->DamageToSaloon;
+    Reward = Data->Reward;
+    CurrentHealth = MaxHealth;
+
+    GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+    if (Data->Mesh) GetMesh()->SetSkeletalMesh(Data->Mesh);
+    if (Data->Material) GetMesh()->SetMaterial(0, Data->Material);
+    GetMesh()->SetRelativeScale3D(FVector(Data->MeshScale));
 }

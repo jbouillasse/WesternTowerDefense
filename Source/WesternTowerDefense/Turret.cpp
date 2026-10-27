@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "TimerManager.h"
+#include "TurretDataAsset.h"
 
 ATurret::ATurret()
 {
@@ -28,6 +29,7 @@ ATurret::ATurret()
 void ATurret::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);
+    ApplyData();
     RangeSphere->SetSphereRadius(Range);
 }
 
@@ -35,6 +37,7 @@ void ATurret::BeginPlay()
 {
     Super::BeginPlay();
 
+    ApplyData();
     RangeSphere->SetSphereRadius(Range);
     RangeSphere->OnComponentBeginOverlap.AddDynamic(this, &ATurret::OnRangeBeginOverlap);
     RangeSphere->OnComponentEndOverlap.AddDynamic(this, &ATurret::OnRangeEndOverlap);
@@ -100,4 +103,16 @@ void ATurret::Fire()
 
     Target->ReceiveDamage(Damage);
 }
-//1234
+
+void ATurret::ApplyData()
+{
+    if (!Data) return;
+
+    Range = Data->Range;
+    Damage = Data->Damage;
+    FireRate = Data->FireRate;
+    Cost = Data->Cost;
+
+    if (Data->Mesh) Mesh->SetSkeletalMesh(Data->Mesh);
+}
+//test

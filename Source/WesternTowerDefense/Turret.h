@@ -7,6 +7,7 @@
 class USphereComponent;
 class USkeletalMeshComponent;
 class AEnemy;
+class UTurretDataAsset;
 
 UCLASS()
 class WESTERNTOWERDEFENSE_API ATurret : public AActor
@@ -31,6 +32,10 @@ protected:
 	void OnRangeEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret")
+	TObjectPtr<UTurretDataAsset> Data;
+
+	void ApplyData();
 	void UpdateTarget();
 	void Fire();
 
