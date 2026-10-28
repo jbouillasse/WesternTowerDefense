@@ -8,43 +8,58 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMoneyChanged, int32, NewMoney);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWaveChanged, int32, CurrentWave, int32, TotalWaves);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCountdownChanged, int32, SecondsLeft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpgradeLevelChanged, int32, NewLevel);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhaseChanged, bool, bPreparation);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameOver, bool, bVictory);
 
 UCLASS()
 class WESTERNTOWERDEFENSE_API ATDGameState : public AGameStateBase
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	void InitState(int32 StartMoney, int32 InTotalWaves);
+    void InitState(int32 StartMoney, int32 InTotalWaves);
 
-	UFUNCTION(BlueprintCallable)
-	void AddMoney(int32 Amount);
+    UFUNCTION(BlueprintCallable)
+    void AddMoney(int32 Amount);
 
-	UFUNCTION(BlueprintCallable)
-	bool TrySpend(int32 Amount);
+    UFUNCTION(BlueprintCallable)
+    bool TrySpend(int32 Amount);
 
-	void SetWave(int32 InCurrentWave);
-	void SetCountdown(int32 Seconds);
-	void NotifyGameOver(bool bVictory);
+    // Améliore tous les tireurs (uniquement entre deux vagues)
+    UFUNCTION(BlueprintCallable)
+    bool TryUpgrade();
 
-	UFUNCTION(BlueprintCallable)
-	void IncreaseUpgradeLevel();
+    void SetWave(int32 InCurrentWave);
+    void SetCountdown(int32 Seconds);
+    void SetPreparation(bool bInPreparation);
+    void NotifyGameOver(bool bVictory);
 
-	UFUNCTION(BlueprintPure) int32 GetMoney() const { return Money; }
-	UFUNCTION(BlueprintPure) int32 GetCurrentWave() const { return CurrentWave; }
-	UFUNCTION(BlueprintPure) int32 GetTotalWaves() const { return TotalWaves; }
-	UFUNCTION(BlueprintPure) int32 GetUpgradeLevel() const { return UpgradeLevel; }
+    UFUNCTION(BlueprintPure) int32 GetMoney() const { return Money; }
+    UFUNCTION(BlueprintPure) int32 GetCurrentWave() const { return CurrentWave; }
+    UFUNCTION(BlueprintPure) int32 GetTotalWaves() const { return TotalWaves; }
+    UFUNCTION(BlueprintPure) int32 GetUpgradeLevel() const { return UpgradeLevel; }
+    UFUNCTION(BlueprintPure) int32 GetMaxUpgradeLevel() const { return MaxUpgradeLevel; }
+    UFUNCTION(BlueprintPure) int32 GetUpgradeCost() const { return UpgradeBaseCost + UpgradeCostStep * UpgradeLevel; }
+    UFUNCTION(BlueprintPure) int32 GetSecondsLeft() const { return SecondsLeft; }
+    UFUNCTION(BlueprintPure) bool IsPreparation() const { return bPreparation; }
 
-	UPROPERTY(BlueprintAssignable) FOnMoneyChanged OnMoneyChanged;
-	UPROPERTY(BlueprintAssignable) FOnWaveChanged OnWaveChanged;
-	UPROPERTY(BlueprintAssignable) FOnCountdownChanged OnCountdownChanged;
-	UPROPERTY(BlueprintAssignable) FOnUpgradeLevelChanged OnUpgradeLevelChanged;
-	UPROPERTY(BlueprintAssignable) FOnGameOver OnGameOver;
+    UPROPERTY(BlueprintAssignable) FOnMoneyChanged OnMoneyChanged;
+    UPROPERTY(BlueprintAssignable) FOnWaveChanged OnWaveChanged;
+    UPROPERTY(BlueprintAssignable) FOnCountdownChanged OnCountdownChanged;
+    UPROPERTY(BlueprintAssignable) FOnUpgradeLevelChanged OnUpgradeLevelChanged;
+    UPROPERTY(BlueprintAssignable) FOnPhaseChanged OnPhaseChanged;
+    UPROPERTY(BlueprintAssignable) FOnGameOver OnGameOver;
 
 private:
-	int32 Money = 0;
-	int32 CurrentWave = 0;
-	int32 TotalWaves = 0;
-	int32 UpgradeLevel = 0;
+    int32 Money = 0;
+    int32 CurrentWave = 0;
+    int32 TotalWaves = 0;
+    int32 UpgradeLevel = 0;
+    int32 SecondsLeft = 0;
+    bool bPreparation = false;
+
+    // Équilibrage de l'amélioration (modifiable ici)
+    static constexpr int32 MaxUpgradeLevel = 5;
+    static constexpr int32 UpgradeBaseCost = 100;
+    static constexpr int32 UpgradeCostStep = 75;
 };

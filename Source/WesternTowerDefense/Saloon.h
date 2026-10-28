@@ -19,7 +19,9 @@ public:
 	ASaloon();
 
 	virtual void ReceiveDamage(float Amount) override;
-
+	
+	float GetMaxHealth() const { return MaxHealth; }
+	
 	UFUNCTION(BlueprintCallable)
 	float GetCurrentHealth() const { return CurrentHealth; }
 

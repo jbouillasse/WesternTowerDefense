@@ -53,6 +53,7 @@ void ATDGameMode::StartCountdown()
 {
     Phase = ETDPhase::Preparation;
     SecondsLeft = FMath::CeilToInt(TimeBetweenWaves);
+    TDState->SetPreparation(true);
     TDState->SetCountdown(SecondsLeft);
     GetWorldTimerManager().SetTimer(CountdownTimer, this, &ATDGameMode::TickCountdown, 1.f, true);
 }
@@ -72,6 +73,7 @@ void ATDGameMode::TickCountdown()
 void ATDGameMode::StartWave()
 {
     ++CurrentWave;
+    TDState->SetPreparation(false);
     TDState->SetWave(CurrentWave);
 
     const FWaveRow* Row = WaveTable->FindRow<FWaveRow>(FName(*FString::FromInt(CurrentWave)), TEXT("StartWave"));
