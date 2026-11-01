@@ -8,7 +8,7 @@ UINTERFACE(MinimalAPI, NotBlueprintable)
 class UDamageable : public UInterface
 {
 	GENERATED_BODY()
-};
+};//test
 
 class WESTERNTOWERDEFENSE_API IDamageable
 {
