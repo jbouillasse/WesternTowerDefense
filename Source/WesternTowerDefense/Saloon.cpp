@@ -27,7 +27,7 @@ void ASaloon::ReceiveDamage(float Amount)
 
 	if (CurrentHealth <= 0.f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Le saloon est detruit !"));
+		UE_LOG(LogTemp, Warning, TEXT("The saloon has fallen !"));
 		OnSaloonDestroyed.Broadcast();
 	}
 }

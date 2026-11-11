@@ -9,7 +9,6 @@ UWorld* UTDDebugWidget::GetTargetWorld() const
 {
     if (!GEditor) return nullptr;
 
-    // En jeu (PIE) on dessine dans le monde de jeu, sinon dans le monde de l'éditeur
     if (GEditor->PlayWorld) return GEditor->PlayWorld;
     return GEditor->GetEditorWorldContext().World();
 }

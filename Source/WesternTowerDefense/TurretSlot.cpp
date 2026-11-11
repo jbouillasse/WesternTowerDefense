@@ -31,7 +31,7 @@ ATurretSlot::ATurretSlot()
 void ATurretSlot::BeginPlay()
 {
     Super::BeginPlay();
-
+    BaseScale = Marker->GetRelativeScale3D();
     ClickBox->OnClicked.AddDynamic(this, &ATurretSlot::HandleBoxClicked);
     ClickBox->OnBeginCursorOver.AddDynamic(this, &ATurretSlot::HandleCursorOver);
     ClickBox->OnEndCursorOver.AddDynamic(this, &ATurretSlot::HandleCursorEnd);
@@ -49,12 +49,12 @@ void ATurretSlot::HandleBoxClicked(UPrimitiveComponent* TouchedComponent, FKey B
 
 void ATurretSlot::HandleCursorOver(UPrimitiveComponent* TouchedComponent)
 {
-    if (!bOccupied) Marker->SetRelativeScale3D(FVector(1.2f));
+    if (!bOccupied) Marker->SetRelativeScale3D(BaseScale * 1.2f);
 }
 
 void ATurretSlot::HandleCursorEnd(UPrimitiveComponent* TouchedComponent)
 {
-    Marker->SetRelativeScale3D(FVector::OneVector);
+    Marker->SetRelativeScale3D(BaseScale);
 }
 
 bool ATurretSlot::Place(TSubclassOf<ATurret> TurretClass, UTurretDataAsset* Data)

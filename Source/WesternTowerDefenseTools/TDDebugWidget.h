@@ -10,7 +10,7 @@ class WESTERNTOWERDEFENSETOOLS_API UTDDebugWidget : public UEditorUtilityWidget
     GENERATED_BODY()
 
 public:
-    // --- Variables de debug (modifiables dans le widget) ---
+    //Variables de debug
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
     bool bShowRanges = true;
 

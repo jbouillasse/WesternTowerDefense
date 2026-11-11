@@ -13,7 +13,7 @@ class WESTERNTOWERDEFENSE_API APathActor : public AActor
 
 public:
     APathActor();
-
+    bool IsAmbushPath() const { return bAmbushPath; }
     UFUNCTION(BlueprintCallable)
     int32 GetWaypointCount() const;
 
@@ -23,4 +23,7 @@ public:
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<USplineComponent> Spline;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Path")
+    bool bAmbushPath = false;
 };

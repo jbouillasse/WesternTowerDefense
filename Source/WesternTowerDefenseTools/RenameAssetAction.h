@@ -10,7 +10,7 @@ class WESTERNTOWERDEFENSETOOLS_API URenameAssetAction : public UAssetActionUtili
     GENERATED_BODY()
 
 public:
-    // Ajoute le préfixe BP_ à tous les assets sélectionnés
+    // Ajoute BP_ à tous les assets sélectionnés
     UFUNCTION(CallInEditor, Category = "Western Defense")
     void AddBPPrefix();
 };

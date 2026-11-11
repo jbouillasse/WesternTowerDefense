@@ -38,7 +38,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "TD")
 	TSubclassOf<ATurret> TurretClass;
 
-	// Tireurs constructibles (index 0 = premier bouton, 1 = deuxième)
 	UPROPERTY(EditAnywhere, Category = "TD")
 	TArray<TObjectPtr<UTurretDataAsset>> Buildable;
 

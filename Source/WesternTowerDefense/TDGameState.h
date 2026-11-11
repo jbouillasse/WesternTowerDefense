@@ -4,12 +4,24 @@
 #include "GameFramework/GameStateBase.h"
 #include "TDGameState.generated.h"
 
+UENUM(BlueprintType)
+enum class ETrainState : uint8
+{
+    Idle,           
+    Requested,      
+    Arriving,       
+    WaitingChoice,  
+    Ambush          
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMoneyChanged, int32, NewMoney);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWaveChanged, int32, CurrentWave, int32, TotalWaves);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCountdownChanged, int32, SecondsLeft);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpgradeLevelChanged, int32, NewLevel);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhaseChanged, bool, bPreparation);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameOver, bool, bVictory);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTrainStateChanged, ETrainState, NewState, int32, CallsLeft);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTrainResult, FText, Message);
 
 UCLASS()
 class WESTERNTOWERDEFENSE_API ATDGameState : public AGameStateBase
@@ -25,14 +37,19 @@ public:
     UFUNCTION(BlueprintCallable)
     bool TrySpend(int32 Amount);
 
-    // Améliore tous les tireurs (uniquement entre deux vagues)
     UFUNCTION(BlueprintCallable)
     bool TryUpgrade();
+
+    bool GrantFreeUpgrade();
 
     void SetWave(int32 InCurrentWave);
     void SetCountdown(int32 Seconds);
     void SetPreparation(bool bInPreparation);
     void NotifyGameOver(bool bVictory);
+
+    void SetTrainCalls(int32 Calls);
+    void SetTrainState(ETrainState NewState);
+    void NotifyTrainResult(const FText& Message);
 
     UFUNCTION(BlueprintPure) int32 GetMoney() const { return Money; }
     UFUNCTION(BlueprintPure) int32 GetCurrentWave() const { return CurrentWave; }
@@ -42,6 +59,8 @@ public:
     UFUNCTION(BlueprintPure) int32 GetUpgradeCost() const { return UpgradeBaseCost + UpgradeCostStep * UpgradeLevel; }
     UFUNCTION(BlueprintPure) int32 GetSecondsLeft() const { return SecondsLeft; }
     UFUNCTION(BlueprintPure) bool IsPreparation() const { return bPreparation; }
+    UFUNCTION(BlueprintPure) ETrainState GetTrainState() const { return TrainState; }
+    UFUNCTION(BlueprintPure) int32 GetTrainCallsLeft() const { return TrainCallsLeft; }
 
     UPROPERTY(BlueprintAssignable) FOnMoneyChanged OnMoneyChanged;
     UPROPERTY(BlueprintAssignable) FOnWaveChanged OnWaveChanged;
@@ -49,6 +68,8 @@ public:
     UPROPERTY(BlueprintAssignable) FOnUpgradeLevelChanged OnUpgradeLevelChanged;
     UPROPERTY(BlueprintAssignable) FOnPhaseChanged OnPhaseChanged;
     UPROPERTY(BlueprintAssignable) FOnGameOver OnGameOver;
+    UPROPERTY(BlueprintAssignable) FOnTrainStateChanged OnTrainStateChanged;
+    UPROPERTY(BlueprintAssignable) FOnTrainResult OnTrainResult;
 
 private:
     int32 Money = 0;
@@ -57,8 +78,9 @@ private:
     int32 UpgradeLevel = 0;
     int32 SecondsLeft = 0;
     bool bPreparation = false;
+    ETrainState TrainState = ETrainState::Idle;
+    int32 TrainCallsLeft = 0;
 
-    // Équilibrage de l'amélioration (modifiable ici)
     static constexpr int32 MaxUpgradeLevel = 5;
     static constexpr int32 UpgradeBaseCost = 100;
     static constexpr int32 UpgradeCostStep = 75;

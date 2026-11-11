@@ -22,7 +22,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	FVector BaseScale = FVector::OneVector;
 	UFUNCTION()
 	void HandleBoxClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
 

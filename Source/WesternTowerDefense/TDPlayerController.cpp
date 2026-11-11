@@ -77,6 +77,6 @@ void ATDPlayerController::TryPlaceOnSlot(ATurretSlot* Slot)
 
     if (!Slot->Place(TurretClass, Data))
     {
-        GS->AddMoney(Data->Cost); // remboursement si le placement échoue
+        GS->AddMoney(Data->Cost);
     }
 }

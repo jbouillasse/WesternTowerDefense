@@ -6,6 +6,9 @@
 
 class USphereComponent;
 class USkeletalMeshComponent;
+class UStaticMeshComponent;
+class UStaticMesh;
+class UMaterialInterface;
 class UAnimMontage;
 class UTurretDataAsset;
 class AEnemy;
@@ -20,7 +23,6 @@ public:
 
     virtual void OnConstruction(const FTransform& Transform) override;
 
-    // Appelé par l'emplacement avant FinishSpawning
     void SetData(UTurretDataAsset* NewData);
 
     float GetRange() const { return CurrentRange; }
@@ -44,7 +46,8 @@ protected:
     void RecalcStats();
     void UpdateTarget();
     void Fire();
-
+    void HideTracer();
+    
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<USceneComponent> Root;
 
@@ -54,10 +57,13 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<USphereComponent> RangeSphere;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    TObjectPtr<UStaticMeshComponent> TracerBeam;
+
+    //Data
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret")
     TObjectPtr<UTurretDataAsset> Data;
 
-    // Valeurs de base (remplacées par le Data Asset s'il y en a un)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret")
     float Range = 800.f;
 
@@ -73,7 +79,18 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret")
     TObjectPtr<UAnimMontage> FireMontage;
 
-    // Valeurs réellement utilisées (base + amélioration)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Tracer")
+    TObjectPtr<UStaticMesh> TracerMesh;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Tracer")
+    TObjectPtr<UMaterialInterface> TracerMaterial;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Tracer")
+    float TracerThickness = 10.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Turret|Tracer")
+    float TracerDuration = 0.08f;
+    
     float CurrentRange = 800.f;
     float CurrentDamage = 25.f;
     float CurrentFireRate = 1.f;
@@ -84,4 +101,5 @@ protected:
 
     FTimerHandle TargetTimer;
     FTimerHandle FireTimer;
+    FTimerHandle TracerTimer;
 };

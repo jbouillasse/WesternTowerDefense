@@ -48,7 +48,7 @@ void AEnemy::PossessedBy(AController* NewController)
     if (!bStarted)
     {
         bStarted = true;
-        CurrentWaypoint = 1; // le point 0 est le point de depart
+        CurrentWaypoint = 1; 
         MoveToNextWaypoint();
     }
 }

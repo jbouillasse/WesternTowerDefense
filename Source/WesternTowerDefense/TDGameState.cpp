@@ -10,7 +10,7 @@ void ATDGameState::InitState(int32 StartMoney, int32 InTotalWaves)
     OnWaveChanged.Broadcast(CurrentWave, TotalWaves);
     OnUpgradeLevelChanged.Broadcast(UpgradeLevel);
 }
-
+//test
 void ATDGameState::AddMoney(int32 Amount)
 {
     Money += Amount;
@@ -30,6 +30,14 @@ bool ATDGameState::TryUpgrade()
     if (!bPreparation || UpgradeLevel >= MaxUpgradeLevel) return false;
     if (!TrySpend(GetUpgradeCost())) return false;
 
+    ++UpgradeLevel;
+    OnUpgradeLevelChanged.Broadcast(UpgradeLevel);
+    return true;
+}
+
+bool ATDGameState::GrantFreeUpgrade()
+{
+    if (UpgradeLevel >= MaxUpgradeLevel) return false;
     ++UpgradeLevel;
     OnUpgradeLevelChanged.Broadcast(UpgradeLevel);
     return true;
@@ -56,4 +64,21 @@ void ATDGameState::SetPreparation(bool bInPreparation)
 void ATDGameState::NotifyGameOver(bool bVictory)
 {
     OnGameOver.Broadcast(bVictory);
+}
+
+void ATDGameState::SetTrainCalls(int32 Calls)
+{
+    TrainCallsLeft = Calls;
+    OnTrainStateChanged.Broadcast(TrainState, TrainCallsLeft);
+}
+
+void ATDGameState::SetTrainState(ETrainState NewState)
+{
+    TrainState = NewState;
+    OnTrainStateChanged.Broadcast(TrainState, TrainCallsLeft);
+}
+
+void ATDGameState::NotifyTrainResult(const FText& Message)
+{
+    OnTrainResult.Broadcast(Message);
 }

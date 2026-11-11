@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "TDGameState.h"
 #include "TDHudWidget.generated.h"
 
 class UTextBlock;
@@ -21,7 +22,6 @@ protected:
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
 
-    // --- Obligatoires ---
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> Text_Money;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> Text_Wave;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> Text_Countdown;
@@ -32,7 +32,6 @@ protected:
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> Text_EndTitle;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Button_Restart;
 
-    // --- Optionnels ---
     UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> Text_SaloonHP;
     UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> Text_Message;
     UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> Text_Selected;
@@ -40,7 +39,14 @@ protected:
     UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UButton> Button_Turret1;
     UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> Text_Turret0;
     UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> Text_Turret1;
-
+    
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UButton> Button_CallTrain;
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> Text_CallTrain;
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UWidget> Panel_Train;
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> Text_TrainTitle;
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UTextBlock> Text_TrainDesc;
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UButton> Button_TrainAccept;
+    UPROPERTY(meta = (BindWidgetOptional)) TObjectPtr<UButton> Button_TrainRefuse;
 private:
     UFUNCTION() void UpdateMoney(int32 NewMoney);
     UFUNCTION() void UpdateWave(int32 CurrentWave, int32 TotalWaves);
@@ -66,4 +72,12 @@ private:
 
     bool bPreparation = false;
     FTimerHandle MessageTimer;
+    
+    UFUNCTION() void UpdateTrain(ETrainState NewState, int32 CallsLeft);
+    UFUNCTION() void ShowTrainResult(FText Message);
+    UFUNCTION() void OnCallTrainClicked();
+    UFUNCTION() void OnTrainAcceptClicked();
+    UFUNCTION() void OnTrainRefuseClicked();
+
+    bool bTrainBusy = false;
 };

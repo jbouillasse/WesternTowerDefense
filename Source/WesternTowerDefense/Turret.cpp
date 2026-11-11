@@ -4,8 +4,10 @@
 #include "TDGameState.h"
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
+#include "Materials/MaterialInterface.h"
 #include "Animation/AnimInstance.h"
-#include "DrawDebugHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
@@ -28,6 +30,13 @@ ATurret::ATurret()
     RangeSphere->SetGenerateOverlapEvents(true);
     RangeSphere->SetHiddenInGame(true);
     RangeSphere->SetCanEverAffectNavigation(false);
+
+    TracerBeam = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TracerBeam"));
+    TracerBeam->SetupAttachment(Root);
+    TracerBeam->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    TracerBeam->SetCanEverAffectNavigation(false);
+    TracerBeam->SetCastShadow(false);
+    TracerBeam->SetVisibility(false);
 }
 
 void ATurret::OnConstruction(const FTransform& Transform)
@@ -53,17 +62,22 @@ void ATurret::ApplyData()
     FireRate = Data->FireRate;
     Cost = Data->Cost;
 
-    if (Data->Mesh) Mesh->SetSkeletalMesh(Data->Mesh);
+    if (Data->Mesh && Mesh)
+    {
+        Mesh->SetSkeletalMesh(Data->Mesh);
+    }
 }
 
 void ATurret::RecalcStats()
 {
-    // Chaque niveau : +25 % de dégâts, +15 % de cadence, +10 % de portée
-    CurrentRange = Range * (1.f + 0.10f * UpgradeLevel);
+    CurrentRange = Range * (1.f + 0.5f * UpgradeLevel);
     CurrentDamage = Damage * (1.f + 0.25f * UpgradeLevel);
     CurrentFireRate = FireRate * (1.f + 0.15f * UpgradeLevel);
 
-    RangeSphere->SetSphereRadius(CurrentRange);
+    if (RangeSphere)
+    {
+        RangeSphere->SetSphereRadius(CurrentRange);
+    }
 
     if (HasActorBegunPlay())
     {
@@ -78,6 +92,15 @@ void ATurret::BeginPlay()
 
     ApplyData();
 
+    if (TracerBeam && TracerMesh)
+    {
+        TracerBeam->SetStaticMesh(TracerMesh);
+        if (TracerMaterial)
+        {
+            TracerBeam->SetMaterial(0, TracerMaterial);
+        }
+    }
+
     if (ATDGameState* GS = GetWorld()->GetGameState<ATDGameState>())
     {
         UpgradeLevel = GS->GetUpgradeLevel(); // une tourelle posée tard hérite du niveau actuel
@@ -88,8 +111,6 @@ void ATurret::BeginPlay()
     RangeSphere->OnComponentEndOverlap.AddDynamic(this, &ATurret::OnRangeEndOverlap);
 
     GetWorldTimerManager().SetTimer(TargetTimer, this, &ATurret::UpdateTarget, 0.1f, true);
-    GetWorldTimerManager().SetTimer(FireTimer, this, &ATurret::Fire,
-        1.f / FMath::Max(CurrentFireRate, 0.01f), true);
 
     RecalcStats();
 }
@@ -144,15 +165,39 @@ void ATurret::UpdateTarget()
 
 void ATurret::Fire()
 {
-    if (!Target.IsValid()) return;
+    AEnemy* Enemy = Target.Get();
+    if (!Enemy) return;
 
-    if (FireMontage && Mesh->GetAnimInstance())
+    if (FireMontage && Mesh && Mesh->GetAnimInstance())
     {
         Mesh->GetAnimInstance()->Montage_Play(FireMontage);
     }
 
-    DrawDebugLine(GetWorld(), GetActorLocation() + FVector(0, 0, 120.f),
-        Target->GetActorLocation(), FColor::Yellow, false, 0.1f, 0, 3.f);
+    if (TracerBeam && TracerBeam->GetStaticMesh())
+    {
+        const FVector Muzzle = GetActorLocation() + FVector(0.f, 0.f, 120.f);
+        const FVector Hit = Enemy->GetActorLocation() + FVector(0.f, 0.f, 80.f);
+        const FVector Delta = Hit - Muzzle;
+        const float Length = Delta.Size();
 
-    Target->ReceiveDamage(CurrentDamage);
+        if (Length > 1.f)
+        {
+            TracerBeam->SetWorldLocation(Muzzle + Delta * 0.5f);
+            TracerBeam->SetWorldRotation(FRotationMatrix::MakeFromZ(Delta.GetSafeNormal()).Rotator());
+            TracerBeam->SetWorldScale3D(FVector(TracerThickness / 100.f, TracerThickness / 100.f, Length / 100.f));
+            TracerBeam->SetVisibility(true);
+
+            GetWorldTimerManager().SetTimer(TracerTimer, this, &ATurret::HideTracer, TracerDuration, false);
+        }
+    }
+
+    Enemy->ReceiveDamage(CurrentDamage);
+}
+
+void ATurret::HideTracer()
+{
+    if (TracerBeam)
+    {
+        TracerBeam->SetVisibility(false);
+    }
 }
